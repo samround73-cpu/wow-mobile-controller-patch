@@ -47,4 +47,4 @@ jobs:
           gh release delete latest --yes --cleanup-tag || true
           gh release create latest wow-mobile-pad.apk \
             --title "WoW Mobile (controller fork) - latest build" \
-            --notes "Built from ${GITHUB_SHA::7}. Right stick camera, separate left stick / D-pad, bindable triggers."
+            --notes "Built from ${GITHUB_SHA::7}. Controller Edition: separate left stick / D-pad, right-stick camera, bindable triggers, INTERACT CENTER for NPCs, camera/cursor toggle, reduced camera flicker, auto login, remembered on-screen controls setting, ConsolePort calibration wizard fix. Uninstall the original WoW Mobile before the first install. See the README for the full list and recommended Xbox mapping."

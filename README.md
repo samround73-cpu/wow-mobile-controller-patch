@@ -1,3 +1,70 @@
+# WoW Mobile — Controller Edition (fork)
+
+A fork of [marcocastignoli/wow-mobile](https://github.com/marcocastignoli/wow-mobile) that adds
+**full physical-controller support** (tested with a Bluetooth Xbox Wireless Controller on a
+Samsung Galaxy S23 Ultra), fixes camera-related black flicker, and adds quality-of-life options
+to the launcher. Everything from the original app still works the same way.
+
+**Download:** [latest APK](https://github.com/samround73-cpu/wow-mobile-controller-patch/releases/tag/latest)
+— built automatically from `main` by GitHub Actions.
+
+> **Installing:** this build is signed with a different key from the original, so uninstall the
+> original WoW Mobile first. Your WoW folder and server are not touched — just pick the game
+> folder again. Updates of this fork install over each other normally.
+
+## What's new in this fork
+
+### Controller support
+- **Left stick and D-pad are separate.** Controller stick movement now reaches the input
+  bindings first and is always consumed, so Android no longer turns left-stick movement into
+  fake D-pad presses (the stick used to fire D-pad bindings).
+- **Right-stick camera.** New *Mouse → LOOK LEFT / RIGHT / UP / DOWN* bindings hold the right
+  mouse button (WoW mouselook) while the stick is pushed and release it when it centres.
+- **Camera spin fix.** The pointer is now clamped to the screen, so the camera no longer
+  occasionally whips round when WoW re-centres the cursor.
+- **Bindable triggers.** Bluetooth Xbox triggers (analog `BRAKE`/`GAS` / `LTRIGGER`/`RTRIGGER`
+  axes) now register as **L2 / R2** and can be bound like any button.
+- **Talk to NPCs with the controller.** New *Mouse → INTERACT CENTER* binding right-clicks just
+  below the centre of the screen: face a quest giver / corpse / object and press it.
+  ConsolePort then drives the quest menus with the D-pad.
+- **Camera / cursor toggle.** New *Mouse → LOOK TOGGLE* binding switches the right stick between
+  camera mode and plain cursor movement (for menus, map, bags).
+- **WoW-friendly defaults** when capturing bindings: left stick → W/A/S/D, right stick → LOOK,
+  D-pad → I/J/K/L (ConsolePort's cursor).
+
+### Display
+- **Much less black flicker when the mouse/camera moves.** The renderer used to redraw on every
+  pointer move (and on every cursor change / cursor-position report), sampling the game's shared
+  frame buffer mid-write. Cursor-only redraws are now skipped while the game is presenting frames.
+
+### Launcher
+- **Auto login** (*WoW Settings → Auto login*): account, password, wait time and an optional
+  "enter the world with my last character" step. The account name is pre-filled in
+  `Config.wtf`; once the login screen appears the password is typed and Enter pressed.
+  Credentials are stored only in the app's private storage on the device.
+- **On-screen controls choice is remembered** between launches.
+- **ConsolePort calibration wizard no longer reopens every login.** Starting the wizard resets
+  ConsolePort's stick type and button-skip flags, and a clean exit saved that broken state.
+  The launcher now re-applies the required settings in `ConsolePort.lua` on every launch while
+  keeping all other ConsolePort settings (a backup is kept as `ConsolePort.lua.bak`).
+
+### Recommended Xbox mapping
+| Controller | Binding | Set to |
+|---|---|---|
+| Left stick up / down / left / right | AXIS Y+ / Y- / X- / X+ | Keyboard W / S / A / D |
+| Right stick up / down / left / right | AXIS RZ+ / RZ- / Z- / Z+ | Mouse LOOK UP / DOWN / LEFT / RIGHT |
+| D-pad up / left / down / right | DPAD | Keyboard I / J / K / L |
+| A / B / X / Y | BUTTON A / B / X / Y | Keyboard N / B / H / Y |
+| LB / LT | BUTTON L1 / L2 | Keyboard L SHIFT / L CTRL |
+| RB / RT | BUTTON R1 / R2 | Keyboard Q / E |
+| View / Menu | BUTTON SELECT / START | Keyboard G / V |
+| Left stick click | BUTTON THUMBL | Keyboard TAB |
+| Right stick click | BUTTON THUMBR | Mouse INTERACT CENTER |
+
+Tip: quit with **Esc → Exit Game** (or `/quit`) so WoW saves addon and key settings.
+
+---
+
 # WoW Mobile
 
 Play **World of Warcraft 3.3.5a (Wrath of the Lich King)** on Android with a
