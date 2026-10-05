@@ -127,6 +127,7 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
     private EnvVars overrideEnvVars;
     private ClipboardManager clipboardManager;
     private SharedPreferences preferences;
+    private static final String PREF_SHOW_TOUCHSCREEN_CONTROLS = "show_touchscreen_controls";
     private final WinHandler winHandler = new WinHandler(this);
     private float globalCursorSpeed = 1.0f;
     private boolean capturePointerOnExternalMouse = true;
@@ -656,6 +657,8 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
         dialog.setOnConfirmCallback(() -> {
             xServer.setRelativeMouseMovement(cbRelativeMouseMovement.isChecked());
             inputControlsView.setShowTouchscreenControls(cbShowTouchscreenControls.isChecked());
+            // Remember the choice so the on-screen controls stay hidden on the next launch.
+            preferences.edit().putBoolean(PREF_SHOW_TOUCHSCREEN_CONTROLS, cbShowTouchscreenControls.isChecked()).apply();
             int position = sProfile.getSelectedItemPosition();
             if (position > 0) {
                 showInputControls(inputControlsManager.getProfiles().get(position - 1));
@@ -670,6 +673,7 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
         inputControlsView.setVisibility(View.VISIBLE);
         inputControlsView.requestFocus();
         inputControlsView.setProfile(profile);
+        inputControlsView.setShowTouchscreenControls(preferences.getBoolean(PREF_SHOW_TOUCHSCREEN_CONTROLS, true));
 
         touchpadView.setSensitivity(profile.getCursorSpeed() * globalCursorSpeed);
         touchpadView.setPointerButtonRightEnabled(false);
