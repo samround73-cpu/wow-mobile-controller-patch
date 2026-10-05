@@ -2,7 +2,9 @@ package com.winlator.wowmobile;
 
 import android.os.Bundle;
 import android.view.View;
+import android.content.SharedPreferences;
 import android.widget.ArrayAdapter;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -33,6 +35,11 @@ public class WowSettingsActivity extends AppCompatActivity {
     private Spinner sResolution;
     private Spinner sFarclip;
     private ArrayList<String> realmlistItems;
+    private CheckBox cbAutoLogin;
+    private EditText etAutoLoginAccount;
+    private EditText etAutoLoginPassword;
+    private EditText etAutoLoginDelay;
+    private CheckBox cbAutoLoginEnterWorld;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,6 +68,7 @@ public class WowSettingsActivity extends AppCompatActivity {
 
         loadRealmlists();
         loadGraphics();
+        loadAutoLogin();
 
         findViewById(R.id.BTSave).setOnClickListener((v) -> save());
     }
@@ -118,6 +126,34 @@ public class WowSettingsActivity extends AppCompatActivity {
         sFarclip.setSelection(farclipIndex);
     }
 
+    private void loadAutoLogin() {
+        cbAutoLogin = findViewById(R.id.CBAutoLogin);
+        etAutoLoginAccount = findViewById(R.id.ETAutoLoginAccount);
+        etAutoLoginPassword = findViewById(R.id.ETAutoLoginPassword);
+        etAutoLoginDelay = findViewById(R.id.ETAutoLoginDelay);
+        cbAutoLoginEnterWorld = findViewById(R.id.CBAutoLoginEnterWorld);
+
+        SharedPreferences prefs = AutoLogin.prefs(this);
+        cbAutoLogin.setChecked(prefs.getBoolean(AutoLogin.PREF_ENABLED, false));
+        etAutoLoginAccount.setText(prefs.getString(AutoLogin.PREF_ACCOUNT, ""));
+        etAutoLoginPassword.setText(prefs.getString(AutoLogin.PREF_PASSWORD, ""));
+        etAutoLoginDelay.setText(prefs.getString(AutoLogin.PREF_DELAY, String.valueOf(AutoLogin.DEFAULT_DELAY_SECONDS)));
+        cbAutoLoginEnterWorld.setChecked(prefs.getBoolean(AutoLogin.PREF_ENTER_WORLD, false));
+    }
+
+    private void saveAutoLogin() {
+        String account = etAutoLoginAccount.getText().toString().trim();
+        AutoLogin.prefs(this).edit()
+            .putBoolean(AutoLogin.PREF_ENABLED, cbAutoLogin.isChecked())
+            .putString(AutoLogin.PREF_ACCOUNT, account)
+            .putString(AutoLogin.PREF_PASSWORD, etAutoLoginPassword.getText().toString())
+            .putString(AutoLogin.PREF_DELAY, etAutoLoginDelay.getText().toString().trim())
+            .putBoolean(AutoLogin.PREF_ENTER_WORLD, cbAutoLoginEnterWorld.isChecked())
+            .apply();
+        // Pre-fill the account name now too, so the login screen focuses the password box.
+        if (cbAutoLogin.isChecked() && !account.isEmpty()) provisioner.setConfigValue("accountName", account);
+    }
+
     private void save() {
         String host;
         if (sRealmlist.getSelectedItemPosition() == realmlistItems.size()-1) {
@@ -132,6 +168,7 @@ public class WowSettingsActivity extends AppCompatActivity {
         provisioner.ensureRealmlist(host);
         provisioner.setConfigValue("gxResolution", RESOLUTIONS[sResolution.getSelectedItemPosition()]);
         provisioner.setConfigValue("farclip", FARCLIP_VALUES[sFarclip.getSelectedItemPosition()]);
+        saveAutoLogin();
 
         AppUtils.showToast(this, R.string.wow_settings_saved);
         finish();

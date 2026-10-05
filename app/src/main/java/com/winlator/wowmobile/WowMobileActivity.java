@@ -162,6 +162,7 @@ public class WowMobileActivity extends AppCompatActivity {
         Executors.newSingleThreadExecutor().execute(() -> {
             Provisioner provisioner = new Provisioner(this, gameFolder);
             boolean provisioned = provisioner.provision();
+            if (provisioned) AutoLogin.prepareConfig(this, provisioner);
 
             handler.post(() -> {
                 if (!provisioned) {

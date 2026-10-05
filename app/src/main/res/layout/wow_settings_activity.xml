@@ -89,6 +89,63 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"/>
 
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:text="@string/wow_autologin"
+                android:textStyle="bold"
+                android:textColor="?attr/colorPrimaryText"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="@string/wow_autologin_note"
+                android:textSize="13sp"
+                android:textColor="?attr/colorSecondaryText"/>
+
+            <CheckBox
+                android:id="@+id/CBAutoLogin"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="@string/wow_autologin_enable"/>
+
+            <EditText
+                android:id="@+id/ETAutoLoginAccount"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:hint="@string/wow_autologin_account"
+                android:inputType="textNoSuggestions|textVisiblePassword"
+                android:importantForAutofill="no"/>
+
+            <EditText
+                android:id="@+id/ETAutoLoginPassword"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:hint="@string/wow_autologin_password"
+                android:inputType="textPassword"
+                android:importantForAutofill="no"/>
+
+            <EditText
+                android:id="@+id/ETAutoLoginDelay"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:hint="@string/wow_autologin_delay"
+                android:inputType="number"
+                android:importantForAutofill="no"/>
+
+            <CheckBox
+                android:id="@+id/CBAutoLoginEnterWorld"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="@string/wow_autologin_enter_world"/>
+
             <Button
                 android:id="@+id/BTSave"
                 android:layout_width="match_parent"

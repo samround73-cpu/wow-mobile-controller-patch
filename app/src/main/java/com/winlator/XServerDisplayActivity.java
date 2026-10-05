@@ -264,6 +264,7 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
         });
 
         setupUI();
+        com.winlator.wowmobile.AutoLogin.attach(this, xServer);
 
         Executors.newSingleThreadExecutor().execute(() -> {
             if (!isGenerateWineprefix()) {
