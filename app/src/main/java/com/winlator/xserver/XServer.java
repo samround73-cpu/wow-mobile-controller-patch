@@ -149,8 +149,14 @@ public class XServer {
     }
 
     public void injectPointerMoveDelta(int dx, int dy) {
+        if (dx == 0 && dy == 0) return;
         try (XLock lock = lock(Lockable.WINDOW_MANAGER, Lockable.INPUT_DEVICE)) {
-            pointer.setPosition(pointer.getX() + dx, pointer.getY() + dy);
+            // Keep the pointer on screen. Unclamped deltas let it drift far off-screen (and
+            // eventually overflow the 16-bit coordinate), so when a game re-centres the cursor
+            // for mouselook it sees one huge jump and the camera spins wildly.
+            int x = Math.max(0, Math.min(screenInfo.width - 1, pointer.getX() + dx));
+            int y = Math.max(0, Math.min(screenInfo.height - 1, pointer.getY() + dy));
+            pointer.setPosition(x, y);
         }
     }
 

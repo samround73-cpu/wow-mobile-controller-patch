@@ -280,7 +280,14 @@ public class InputControlsView extends View {
             mouseMoveTimer.schedule(new TimerTask() {
                 @Override
                 public void run() {
-                    xServer.injectPointerMoveDelta((int)(mouseMoveOffset.x * 10 * cursorSpeed), (int)(mouseMoveOffset.y * 10 * cursorSpeed));
+                    int dx = (int)(mouseMoveOffset.x * 10 * cursorSpeed);
+                    int dy = (int)(mouseMoveOffset.y * 10 * cursorSpeed);
+                    if (dx == 0 && dy == 0) return;
+                    if (lookButtonHeld && xServer.isRelativeMouseMovement() && xServer.getWinHandler() != null) {
+                        // Relative mode: send raw deltas straight to Windows, like the touchpad does.
+                        xServer.getWinHandler().mouseEvent(com.winlator.winhandler.MouseEventFlags.MOVE, dx, dy, 0);
+                    }
+                    else xServer.injectPointerMoveDelta(dx, dy);
                 }
             }, 0, 1000 / 60);
         }
