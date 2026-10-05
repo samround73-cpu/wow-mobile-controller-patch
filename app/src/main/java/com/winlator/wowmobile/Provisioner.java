@@ -15,6 +15,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -358,6 +360,18 @@ public class Provisioner {
         File file = new File(savedVariablesDir, "ConsolePort.lua");
         if (file.isFile()) {
             String content = FileUtils.readString(file);
+            // An existing config can still be broken: starting the addon's calibration wizard
+            // (e.g. on the first login) resets the stick type and button-skip flags, and once
+            // the game exits cleanly that broken state is saved, so the wizard reopens on every
+            // login. Re-apply the settings the touch/controller mapping depends on.
+            String repaired = content != null ? repairConsolePortSettings(content) : null;
+            if (repaired != null) {
+                if (!repaired.equals(content.replace("\r\n", "\n"))) {
+                    FileUtils.copy(file, new File(savedVariablesDir, "ConsolePort.lua.bak"));
+                    FileUtils.writeString(file, repaired);
+                }
+                return;
+            }
             // A complete configuration has our (or the wizard's) key calibration.
             // Anything else is a half-finished wizard state saved during the first
             // session — back it up and replace it, or the wizard reopens forever.
@@ -393,5 +407,69 @@ public class Provisioner {
             "\t},\n" +
             "}\n";
         FileUtils.writeString(file, seed);
+    }
+
+    /** Settings the launcher's key mapping relies on; anything else the player changes is kept. */
+    private static final String[][] REQUIRED_CP_SETTINGS = {
+        {"type", "\"XBOX\""},
+        {"skipGuideBtn", "true"},
+        {"skipCP_T3", "true"},
+        {"skipCP_T4", "true"},
+        {"skipCP_T5", "true"},
+        {"skipCP_T6", "true"},
+        {"stickRadialType", "2"},
+        {"stickRadialLocal", "true"},
+    };
+
+    private static final String CP_CALIBRATION_BLOCK =
+        "\t[\"calibration\"] = {\n" +
+        "\t\t[\"CP_R_UP\"] = \"Y\",\n" +
+        "\t\t[\"CP_R_RIGHT\"] = \"B\",\n" +
+        "\t\t[\"CP_R_DOWN\"] = \"N\",\n" +
+        "\t\t[\"CP_R_LEFT\"] = \"H\",\n" +
+        "\t\t[\"CP_L_UP\"] = \"I\",\n" +
+        "\t\t[\"CP_L_RIGHT\"] = \"L\",\n" +
+        "\t\t[\"CP_L_DOWN\"] = \"K\",\n" +
+        "\t\t[\"CP_L_LEFT\"] = \"J\",\n" +
+        "\t\t[\"CP_T1\"] = \"Q\",\n" +
+        "\t\t[\"CP_T2\"] = \"E\",\n" +
+        "\t\t[\"CP_X_LEFT\"] = \"G\",\n" +
+        "\t\t[\"CP_X_RIGHT\"] = \"V\",\n" +
+        "\t},\n";
+
+    /**
+     * Rewrites the required keys inside an existing ConsolePortSettings table, keeping every
+     * other saved setting. Returns null if the file has no ConsolePortSettings table to repair.
+     */
+    static String repairConsolePortSettings(String content) {
+        content = content.replace("\r\n", "\n");
+        int start = content.indexOf("ConsolePortSettings = {");
+        if (start < 0) return null;
+        int end = content.indexOf("\n}", start);
+        if (end < 0) return null;
+
+        String head = content.substring(0, start);
+        String block = content.substring(start, end + 1); // up to and including the newline before "}"
+        String tail = content.substring(end + 1);
+
+        // Calibration table: replace whatever is there with the launcher's key map.
+        // Patterns start at a newline + single tab so only top-level keys match, never nested ones.
+        Matcher cal = Pattern.compile("\n\t\\[\"calibration\"\\] = \\{.*?\n\t\\},?\n", Pattern.DOTALL).matcher(block);
+        if (cal.find()) {
+            block = block.substring(0, cal.start()) + "\n" + CP_CALIBRATION_BLOCK + block.substring(cal.end());
+        }
+        else {
+            Matcher calLine = Pattern.compile("\n\t\\[\"calibration\"\\] = [^\n]*\n").matcher(block);
+            if (calLine.find()) block = block.substring(0, calLine.start()) + "\n" + CP_CALIBRATION_BLOCK + block.substring(calLine.end());
+            else block = block + CP_CALIBRATION_BLOCK;
+        }
+
+        for (String[] setting : REQUIRED_CP_SETTINGS) {
+            String line = "\t[\"" + setting[0] + "\"] = " + setting[1] + ",\n";
+            Matcher m = Pattern.compile("\n\t\\[\"" + Pattern.quote(setting[0]) + "\"\\] = [^\n]*\n").matcher(block);
+            if (m.find()) block = block.substring(0, m.start()) + "\n" + line + block.substring(m.end());
+            else block = block + line;
+        }
+        return head + block + tail;
     }
 }
