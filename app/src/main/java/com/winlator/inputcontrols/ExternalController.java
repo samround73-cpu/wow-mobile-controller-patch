@@ -28,6 +28,7 @@ public class ExternalController implements GamepadSlot {
     public static final byte IDX_BUTTON_R3 = 9;
     public static final byte IDX_BUTTON_L2 = 10;
     public static final byte IDX_BUTTON_R2 = 11;
+    public static final float TRIGGER_PRESS_THRESHOLD = 0.4f;
     private String name;
     private short vendorId;
     private short productId;
@@ -175,6 +176,10 @@ public class ExternalController implements GamepadSlot {
     private void processTriggerButton(MotionEvent event) {
         state.triggerL = Mathf.clamp(Math.max(event.getAxisValue(MotionEvent.AXIS_LTRIGGER), event.getAxisValue(MotionEvent.AXIS_BRAKE)) - Mathf.EPSILON, 0.0f, 1.0f);
         state.triggerR = Mathf.clamp(Math.max(event.getAxisValue(MotionEvent.AXIS_RTRIGGER), event.getAxisValue(MotionEvent.AXIS_GAS)) - Mathf.EPSILON, 0.0f, 1.0f);
+        // Bluetooth Xbox pads report triggers only as axes; expose them as L2/R2 button presses
+        // so they can be bound and fire like any other button.
+        state.setButtonBit(IDX_BUTTON_L2, state.triggerL > TRIGGER_PRESS_THRESHOLD);
+        state.setButtonBit(IDX_BUTTON_R2, state.triggerR > TRIGGER_PRESS_THRESHOLD);
     }
 
     public boolean updateStateFromMotionEvent(MotionEvent event) {

@@ -1,0 +1,50 @@
+name: Build APK
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Install NDK 24 and CMake 3.22.1
+        run: |
+          yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses > /dev/null || true
+          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "platforms;android-34" "ndk;24.0.8215888" "cmake;3.22.1"
+
+      - name: Build debug APK
+        run: |
+          chmod +x gradlew
+          ./gradlew --no-daemon assembleDebug
+
+      - name: Rename APK
+        run: |
+          APK=$(ls app/build/outputs/apk/debug/*.apk | head -n1)
+          cp "$APK" wow-mobile-pad.apk
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: wow-mobile-pad
+          path: wow-mobile-pad.apk
+
+      - name: Publish to the "latest" release (easy phone download)
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release delete latest --yes --cleanup-tag || true
+          gh release create latest wow-mobile-pad.apk \
+            --title "WoW Mobile (controller fork) - latest build" \
+            --notes "Built from ${GITHUB_SHA::7}. Right stick camera, separate left stick / D-pad, bindable triggers."

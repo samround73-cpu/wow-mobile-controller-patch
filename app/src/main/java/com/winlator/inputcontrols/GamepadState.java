@@ -37,6 +37,14 @@ public class GamepadState {
         else buttons &= ~flag;
     }
 
+    public void setButtonBit(int buttonIdx, boolean pressed) {
+        int flag = 1<<buttonIdx;
+        if (pressed) {
+            buttons |= flag;
+        }
+        else buttons &= ~flag;
+    }
+
     public boolean isPressed(int buttonIdx) {
         return (buttons & (1<<buttonIdx)) != 0;
     }

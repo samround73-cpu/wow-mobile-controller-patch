@@ -59,6 +59,8 @@ public class InputControlsView extends View {
     private final Bitmap[] icons = new Bitmap[18];
     private Timer mouseMoveTimer;
     private final PointF mouseMoveOffset = new PointF();
+    private final PointF lookOffset = new PointF();
+    private boolean lookButtonHeld = false;
     private boolean showTouchscreenControls = true;
 
     public InputControlsView(Context context) {
@@ -306,6 +308,15 @@ public class InputControlsView extends View {
 
     @Override
     public boolean onGenericMotionEvent(MotionEvent event) {
+        return handleControllerMotionEvent(event) || super.onGenericMotionEvent(event);
+    }
+
+    /**
+     * Applies a physical controller's stick/trigger movement to the active profile's bindings.
+     * Called directly by the activity so stick input reaches the bindings even when Wine has
+     * also claimed the controller as a gamepad.
+     */
+    public boolean handleControllerMotionEvent(MotionEvent event) {
         if (!editMode && profile != null) {
             ExternalController controller = profile.getController(event.getDeviceId());
             if (controller != null && controller.updateStateFromMotionEvent(event)) {
@@ -321,7 +332,7 @@ public class InputControlsView extends View {
                 return true;
             }
         }
-        return super.onGenericMotionEvent(event);
+        return false;
     }
 
     @Override
@@ -486,6 +497,9 @@ public class InputControlsView extends View {
                 mouseMoveOffset.y = isActionDown ? (offset != 0 ? offset : (binding == Binding.MOUSE_MOVE_UP ? -1 : 1)) : 0;
                 if (isActionDown) createMouseMoveTimer();
             }
+            else if (binding.isMouseLook()) {
+                handleMouseLook(binding, isActionDown, offset);
+            }
             else if (binding.keycode.isCustomKey()) {
                 if (!isActionDown) handleCommandKeyEvent(binding);
             }
@@ -505,6 +519,37 @@ public class InputControlsView extends View {
                 }
             }
         }
+    }
+
+    /**
+     * Stick camera: holds the right mouse button (WoW mouselook) while the stick is pushed and
+     * turns stick deflection into pointer movement; releases the button when the stick centres.
+     */
+    private void handleMouseLook(Binding binding, boolean isActionDown, float offset) {
+        if (xServer == null) return;
+        boolean horizontal = binding == Binding.MOUSE_LOOK_LEFT || binding == Binding.MOUSE_LOOK_RIGHT;
+        boolean negative = binding == Binding.MOUSE_LOOK_LEFT || binding == Binding.MOUSE_LOOK_UP;
+        float value = isActionDown ? (offset != 0 ? offset : (negative ? -1 : 1)) : 0;
+
+        if (horizontal) {
+            lookOffset.x = value;
+            mouseMoveOffset.x = value;
+        }
+        else {
+            lookOffset.y = value;
+            mouseMoveOffset.y = value;
+        }
+
+        boolean active = lookOffset.x != 0 || lookOffset.y != 0;
+        if (active && !lookButtonHeld) {
+            xServer.injectPointerButtonPress(Pointer.Button.BUTTON_RIGHT);
+            lookButtonHeld = true;
+        }
+        else if (!active && lookButtonHeld) {
+            xServer.injectPointerButtonRelease(Pointer.Button.BUTTON_RIGHT);
+            lookButtonHeld = false;
+        }
+        if (isActionDown) createMouseMoveTimer();
     }
 
     public Bitmap getIcon(byte id) {

@@ -114,17 +114,25 @@ public class ExternalControllerBindingsActivity extends AppCompatActivity {
         byte sign;
         for (int i = 0; i < axes.length; i++) {
             if ((sign = Mathf.sign(values[i])) != 0) {
-                if (axes[i] == MotionEvent.AXIS_X || axes[i] == MotionEvent.AXIS_Z) {
-                    binding = sign > 0 ? Binding.MOUSE_MOVE_RIGHT : Binding.MOUSE_MOVE_LEFT;
-                }
-                else if (axes[i] == MotionEvent.AXIS_Y || axes[i] == MotionEvent.AXIS_RZ) {
-                    binding = sign > 0 ? Binding.MOUSE_MOVE_DOWN : Binding.MOUSE_MOVE_UP;
-                }
-                else if (axes[i] == MotionEvent.AXIS_HAT_X) {
+                // WoW + ConsolePort defaults: left stick walks (WASD), right stick is the camera,
+                // D-pad drives ConsolePort's cursor (I/J/K/L).
+                if (axes[i] == MotionEvent.AXIS_X) {
                     binding = sign > 0 ? Binding.KEY_D : Binding.KEY_A;
                 }
-                else if (axes[i] == MotionEvent.AXIS_HAT_Y) {
+                else if (axes[i] == MotionEvent.AXIS_Y) {
                     binding = sign > 0 ? Binding.KEY_S : Binding.KEY_W;
+                }
+                else if (axes[i] == MotionEvent.AXIS_Z) {
+                    binding = sign > 0 ? Binding.MOUSE_LOOK_RIGHT : Binding.MOUSE_LOOK_LEFT;
+                }
+                else if (axes[i] == MotionEvent.AXIS_RZ) {
+                    binding = sign > 0 ? Binding.MOUSE_LOOK_DOWN : Binding.MOUSE_LOOK_UP;
+                }
+                else if (axes[i] == MotionEvent.AXIS_HAT_X) {
+                    binding = sign > 0 ? Binding.KEY_L : Binding.KEY_J;
+                }
+                else if (axes[i] == MotionEvent.AXIS_HAT_Y) {
+                    binding = sign > 0 ? Binding.KEY_K : Binding.KEY_I;
                 }
 
                 keyCode = ExternalControllerBinding.getKeyCodeForAxis(axes[i], sign);

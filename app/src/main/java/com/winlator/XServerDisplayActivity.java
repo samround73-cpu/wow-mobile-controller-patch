@@ -777,6 +777,14 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
 
     @Override
     public boolean dispatchGenericMotionEvent(MotionEvent event) {
+        if (ExternalController.isJoystickDevice(event) && ExternalController.isGameController(event.getDevice())) {
+            // Feed both the touch-controls profile (keyboard/mouse bindings) and Wine's virtual
+            // gamepad, then report the event as handled. Returning false here made Android
+            // synthesize D-pad key presses from the left stick, so the stick fired D-pad bindings.
+            boolean byProfile = inputControlsView.handleControllerMotionEvent(event);
+            boolean byWine = winHandler.onGenericMotionEvent(event);
+            if (byProfile || byWine) return true;
+        }
         return !winHandler.onGenericMotionEvent(event) && !touchpadView.onExternalMouseEvent(event) && super.dispatchGenericMotionEvent(event);
     }
 
