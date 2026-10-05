@@ -61,6 +61,9 @@ public class InputControlsView extends View {
     private final PointF mouseMoveOffset = new PointF();
     private final PointF lookOffset = new PointF();
     private boolean lookButtonHeld = false;
+    /** Interact aims a little below centre: WoW's camera sits above the character, so NPCs
+     *  you're facing appear just under the middle of the screen. */
+    private static final float INTERACT_POINT_Y = 0.55f;
     private boolean showTouchscreenControls = true;
 
     public InputControlsView(Context context) {
@@ -507,6 +510,9 @@ public class InputControlsView extends View {
             else if (binding.isMouseLook()) {
                 handleMouseLook(binding, isActionDown, offset);
             }
+            else if (binding == Binding.MOUSE_INTERACT_CENTER) {
+                handleInteractCenter(isActionDown);
+            }
             else if (binding.keycode.isCustomKey()) {
                 if (!isActionDown) handleCommandKeyEvent(binding);
             }
@@ -557,6 +563,22 @@ public class InputControlsView extends View {
             lookButtonHeld = false;
         }
         if (isActionDown) createMouseMoveTimer();
+    }
+
+    /**
+     * Controller "interact": right-clicks whatever is in the middle of the screen, so facing an
+     * NPC and pressing the button talks to it (or loots a corpse / uses an object), the same as
+     * right-clicking it with a mouse.
+     */
+    private void handleInteractCenter(boolean isActionDown) {
+        if (xServer == null) return;
+        if (isActionDown) {
+            if (!xServer.isRelativeMouseMovement()) {
+                xServer.injectPointerMove(xServer.screenInfo.width / 2, (int)(xServer.screenInfo.height * INTERACT_POINT_Y));
+            }
+            xServer.injectPointerButtonPress(Pointer.Button.BUTTON_RIGHT);
+        }
+        else xServer.injectPointerButtonRelease(Pointer.Button.BUTTON_RIGHT);
     }
 
     public Bitmap getIcon(byte id) {
