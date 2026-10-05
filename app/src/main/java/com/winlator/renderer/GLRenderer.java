@@ -54,6 +54,8 @@ public class GLRenderer implements GLSurfaceView.Renderer, WindowManager.OnWindo
     private boolean toggleFullscreen = false;
     protected boolean viewportNeedsUpdate = true;
     private boolean cursorVisible = true;
+    private volatile long lastContentUpdateTime = 0;
+    private static final long POINTER_REDRAW_IDLE_MS = 100;
     private float cursorScale = 1.0f;
     private int cursorBackColor = 0xffffff;
     private int cursorForeColor = 0x000000;
@@ -167,6 +169,7 @@ public class GLRenderer implements GLSurfaceView.Renderer, WindowManager.OnWindo
 
     @Override
     public void onUpdateWindowContent(Window window) {
+        lastContentUpdateTime = android.os.SystemClock.uptimeMillis();
         xServerView.requestRender();
     }
 
@@ -186,7 +189,13 @@ public class GLRenderer implements GLSurfaceView.Renderer, WindowManager.OnWindo
 
     @Override
     public void onPointerMove(short x, short y) {
-        xServerView.requestRender();
+        // While a game is presenting frames, every new frame already redraws the cursor, so an
+        // extra redraw per pointer move only samples the game's shared frame buffer at random
+        // moments (possibly mid-write), which shows up as black flicker when the camera turns
+        // (mouselook moves the pointer constantly). Only redraw for pointer moves when idle.
+        if (android.os.SystemClock.uptimeMillis() - lastContentUpdateTime > POINTER_REDRAW_IDLE_MS) {
+            xServerView.requestRender();
+        }
     }
 
     private void renderCursorDrawable(Drawable drawable, int x, int y) {
