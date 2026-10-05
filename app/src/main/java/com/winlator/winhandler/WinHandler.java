@@ -325,7 +325,7 @@ public class WinHandler {
                 XServer xServer = activity.getXServer();
                 xServer.pointer.setX(x);
                 xServer.pointer.setY(y);
-                activity.getXServerView().requestRender();
+                activity.getXServerView().getRenderer().requestCursorRender();
                 break;
             }
             case RequestCodes.OPEN_URL: {

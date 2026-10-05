@@ -184,15 +184,22 @@ public class GLRenderer implements GLSurfaceView.Renderer, WindowManager.OnWindo
 
     @Override
     public void onUpdateWindowAttributes(Window window, Bitmask mask) {
-        if (mask.isSet(WindowAttributes.FLAG_CURSOR)) xServerView.requestRender();
+        if (mask.isSet(WindowAttributes.FLAG_CURSOR)) requestCursorRender();
     }
 
     @Override
     public void onPointerMove(short x, short y) {
-        // While a game is presenting frames, every new frame already redraws the cursor, so an
-        // extra redraw per pointer move only samples the game's shared frame buffer at random
-        // moments (possibly mid-write), which shows up as black flicker when the camera turns
-        // (mouselook moves the pointer constantly). Only redraw for pointer moves when idle.
+        requestCursorRender();
+    }
+
+    /**
+     * Redraw for a cursor-only change (pointer moved, cursor image changed, cursor position
+     * reported back from Windows). While a game is presenting frames, every new frame already
+     * redraws the cursor, so extra redraws only sample the game's shared frame buffer at random
+     * moments (possibly mid-write), which shows up as black flicker whenever the mouse moves
+     * (touch, stick or mouselook). Only redraw for these when the game is idle.
+     */
+    public void requestCursorRender() {
         if (android.os.SystemClock.uptimeMillis() - lastContentUpdateTime > POINTER_REDRAW_IDLE_MS) {
             xServerView.requestRender();
         }

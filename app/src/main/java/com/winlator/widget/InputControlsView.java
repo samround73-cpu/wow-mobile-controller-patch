@@ -61,6 +61,7 @@ public class InputControlsView extends View {
     private final PointF mouseMoveOffset = new PointF();
     private final PointF lookOffset = new PointF();
     private boolean lookButtonHeld = false;
+    private boolean lookAsCursor = false;
     /** Interact aims a little below centre: WoW's camera sits above the character, so NPCs
      *  you're facing appear just under the middle of the screen. */
     private static final float INTERACT_POINT_Y = 0.55f;
@@ -513,6 +514,16 @@ public class InputControlsView extends View {
             else if (binding == Binding.MOUSE_INTERACT_CENTER) {
                 handleInteractCenter(isActionDown);
             }
+            else if (binding == Binding.MOUSE_LOOK_TOGGLE) {
+                // Switch LOOK bindings between camera (holds right button) and plain cursor.
+                if (isActionDown) {
+                    lookAsCursor = !lookAsCursor;
+                    if (lookAsCursor && lookButtonHeld && xServer != null) {
+                        xServer.injectPointerButtonRelease(Pointer.Button.BUTTON_RIGHT);
+                        lookButtonHeld = false;
+                    }
+                }
+            }
             else if (binding.keycode.isCustomKey()) {
                 if (!isActionDown) handleCommandKeyEvent(binding);
             }
@@ -553,7 +564,7 @@ public class InputControlsView extends View {
             mouseMoveOffset.y = value;
         }
 
-        boolean active = lookOffset.x != 0 || lookOffset.y != 0;
+        boolean active = !lookAsCursor && (lookOffset.x != 0 || lookOffset.y != 0);
         if (active && !lookButtonHeld) {
             xServer.injectPointerButtonPress(Pointer.Button.BUTTON_RIGHT);
             lookButtonHeld = true;
