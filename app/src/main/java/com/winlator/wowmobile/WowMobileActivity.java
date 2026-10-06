@@ -162,7 +162,15 @@ public class WowMobileActivity extends AppCompatActivity {
         Executors.newSingleThreadExecutor().execute(() -> {
             Provisioner provisioner = new Provisioner(this, gameFolder);
             boolean provisioned = provisioner.provision();
-            if (provisioned) AutoLogin.prepareConfig(this, provisioner);
+            if (provisioned) {
+                AutoLogin.prepareConfig(this, provisioner);
+                // Uncapped frame rates make the compositor grab frames before they are
+                // finished (black flicker). Default to 30 fps unless the player chose a cap.
+                if (provisioner.getConfigValue("maxFPS") == null) {
+                    provisioner.setConfigValue("maxFPS", WowSettingsActivity.DEFAULT_MAXFPS);
+                    provisioner.setConfigValue("maxFPSBk", WowSettingsActivity.DEFAULT_MAXFPS);
+                }
+            }
 
             handler.post(() -> {
                 if (!provisioned) {

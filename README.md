@@ -38,6 +38,10 @@ to the launcher. Everything from the original app still works the same way.
   frame buffer mid-write. Cursor-only redraws are now skipped while the game is presenting frames.
 
 ### Launcher
+- **Frame rate limit** (*WoW Settings → Frame rate limit*, default **30 fps**). Uncapped frame
+  rates let the compositor grab frames before they are finished, which shows as black flicker
+  (especially when opening shops or moving the ConsolePort cursor). Applied automatically on
+  launch unless you pick another value.
 - **Auto login** (*WoW Settings → Auto login*): account, password, wait time and an optional
   "enter the world with my last character" step. The account name is pre-filled in
   `Config.wtf`; once the login screen appears the password is typed and Enter pressed.

@@ -27,6 +27,9 @@ public class WowSettingsActivity extends AppCompatActivity {
     private static final String[] RESOLUTIONS = {"800x360", "960x432", "1200x540", "1600x720"};
     private static final String[] FARCLIP_LABELS = {"Near (fastest)", "Medium", "Far (slower)"};
     private static final String[] FARCLIP_VALUES = {"400", "727", "1000"};
+    static final String[] MAXFPS_LABELS = {"30 fps (recommended)", "40 fps", "45 fps", "60 fps", "Unlimited"};
+    static final String[] MAXFPS_VALUES = {"30", "40", "45", "60", "0"};
+    static final String DEFAULT_MAXFPS = "30";
 
     private GameFolder gameFolder;
     private Provisioner provisioner;
@@ -34,6 +37,7 @@ public class WowSettingsActivity extends AppCompatActivity {
     private EditText etCustomRealmlist;
     private Spinner sResolution;
     private Spinner sFarclip;
+    private Spinner sMaxFps;
     private ArrayList<String> realmlistItems;
     private CheckBox cbAutoLogin;
     private EditText etAutoLoginAccount;
@@ -61,6 +65,7 @@ public class WowSettingsActivity extends AppCompatActivity {
         etCustomRealmlist = findViewById(R.id.ETCustomRealmlist);
         sResolution = findViewById(R.id.SResolution);
         sFarclip = findViewById(R.id.SFarclip);
+        sMaxFps = findViewById(R.id.SMaxFps);
 
         TextView tvLocale = findViewById(R.id.TVLocale);
         String locale = gameFolder.getLocale();
@@ -124,6 +129,13 @@ public class WowSettingsActivity extends AppCompatActivity {
         int farclipIndex = 1;
         for (int i = 0; i < FARCLIP_VALUES.length; i++) if (FARCLIP_VALUES[i].equals(farclip)) farclipIndex = i;
         sFarclip.setSelection(farclipIndex);
+
+        sMaxFps.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, MAXFPS_LABELS));
+        String maxFps = provisioner.getConfigValue("maxFPS");
+        if (maxFps == null) maxFps = DEFAULT_MAXFPS;
+        int fpsIndex = 0;
+        for (int i = 0; i < MAXFPS_VALUES.length; i++) if (MAXFPS_VALUES[i].equals(maxFps)) fpsIndex = i;
+        sMaxFps.setSelection(fpsIndex);
     }
 
     private void loadAutoLogin() {
@@ -168,6 +180,9 @@ public class WowSettingsActivity extends AppCompatActivity {
         provisioner.ensureRealmlist(host);
         provisioner.setConfigValue("gxResolution", RESOLUTIONS[sResolution.getSelectedItemPosition()]);
         provisioner.setConfigValue("farclip", FARCLIP_VALUES[sFarclip.getSelectedItemPosition()]);
+        String fps = MAXFPS_VALUES[sMaxFps.getSelectedItemPosition()];
+        provisioner.setConfigValue("maxFPS", fps);
+        provisioner.setConfigValue("maxFPSBk", fps);
         saveAutoLogin();
 
         AppUtils.showToast(this, R.string.wow_settings_saved);

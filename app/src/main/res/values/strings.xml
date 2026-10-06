@@ -27,6 +27,8 @@
     <string name="wow_settings_note">Change these only while the game is closed — WoW overwrites its config on exit.</string>
     <string name="wow_settings_saved">Settings saved</string>
     <string name="wow_save">Save</string>
+    <string name="wow_frame_rate">Frame rate limit</string>
+    <string name="wow_frame_rate_note">30 fps avoids black flicker on most phones. Raise it only if your screen stays clean.</string>
     <string name="wow_autologin">Auto login</string>
     <string name="wow_autologin_note">Types your login automatically when the login screen appears. Stored on this device only. If it types too early, raise the delay.</string>
     <string name="wow_autologin_enable">Log in automatically</string>
