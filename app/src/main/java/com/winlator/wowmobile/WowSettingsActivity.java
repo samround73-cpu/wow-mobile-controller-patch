@@ -38,6 +38,7 @@ public class WowSettingsActivity extends AppCompatActivity {
     private Spinner sResolution;
     private Spinner sFarclip;
     private Spinner sMaxFps;
+    private Spinner sUiScale;
     private ArrayList<String> realmlistItems;
     private CheckBox cbAutoLogin;
     private EditText etAutoLoginAccount;
@@ -66,6 +67,7 @@ public class WowSettingsActivity extends AppCompatActivity {
         sResolution = findViewById(R.id.SResolution);
         sFarclip = findViewById(R.id.SFarclip);
         sMaxFps = findViewById(R.id.SMaxFps);
+        sUiScale = findViewById(R.id.SUiScale);
 
         TextView tvLocale = findViewById(R.id.TVLocale);
         String locale = gameFolder.getLocale();
@@ -136,6 +138,12 @@ public class WowSettingsActivity extends AppCompatActivity {
         int fpsIndex = 0;
         for (int i = 0; i < MAXFPS_VALUES.length; i++) if (MAXFPS_VALUES[i].equals(maxFps)) fpsIndex = i;
         sMaxFps.setSelection(fpsIndex);
+
+        sUiScale.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, UiScale.LABELS));
+        String uiScale = UiScale.get(this);
+        int uiIndex = 3;
+        for (int i = 0; i < UiScale.VALUES.length; i++) if (UiScale.VALUES[i].equals(uiScale)) uiIndex = i;
+        sUiScale.setSelection(uiIndex);
     }
 
     private void loadAutoLogin() {
@@ -183,6 +191,8 @@ public class WowSettingsActivity extends AppCompatActivity {
         String fps = MAXFPS_VALUES[sMaxFps.getSelectedItemPosition()];
         provisioner.setConfigValue("maxFPS", fps);
         provisioner.setConfigValue("maxFPSBk", fps);
+        UiScale.set(this, UiScale.VALUES[sUiScale.getSelectedItemPosition()]);
+        for (File accountDir : gameFolder.getAccountDirs()) UiScale.applyToAccount(this, accountDir);
         saveAutoLogin();
 
         AppUtils.showToast(this, R.string.wow_settings_saved);

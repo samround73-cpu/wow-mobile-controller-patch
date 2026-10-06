@@ -27,6 +27,8 @@
     <string name="wow_settings_note">Change these only while the game is closed — WoW overwrites its config on exit.</string>
     <string name="wow_settings_saved">Settings saved</string>
     <string name="wow_save">Save</string>
+    <string name="wow_ui_scale">Interface size</string>
+    <string name="wow_ui_scale_note">Makes menus, quest text and windows bigger than WoW\'s own UI Scale slider allows. Leave WoW\'s "Use UI Scale" box unticked. In game you can also type /uiscale 1.3</string>
     <string name="wow_frame_rate">Frame rate limit</string>
     <string name="wow_frame_rate_note">30 fps avoids black flicker on most phones. Raise it only if your screen stays clean.</string>
     <string name="wow_autologin">Auto login</string>

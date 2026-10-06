@@ -118,10 +118,12 @@ public class Provisioner {
                 marker.put("accounts", provisionedAccounts);
             }
 
+            UiScale.installAddon(gameFolder);
             for (File accountDir : gameFolder.getAccountDirs()) {
                 String name = accountDir.getName();
                 patchBindingsCache(accountDir);
                 seedSavedVariables(accountDir);
+                UiScale.applyToAccount(context, accountDir);
                 if (provisionedAccounts.optInt(name, 0) < PROVISION_VERSION) {
                     provisionedAccounts.put(name, PROVISION_VERSION);
                     saveMarker();

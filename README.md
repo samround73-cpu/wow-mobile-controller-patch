@@ -38,6 +38,10 @@ to the launcher. Everything from the original app still works the same way.
   frame buffer mid-write. Cursor-only redraws are now skipped while the game is presenting frames.
 
 ### Launcher
+- **Interface size** (*WoW Settings → Interface size*, default **1.3x**). WoW 3.3.5's own UI Scale
+  slider only goes up to 1.0, which is tiny on a phone. The launcher installs a small
+  `WoWMobileUIScale` addon that scales menus, quest text and windows beyond that. In game,
+  `/uiscale 1.3` changes it too. Leave WoW's own "Use UI Scale" box unticked.
 - **Frame rate limit** (*WoW Settings → Frame rate limit*, default **30 fps**). Uncapped frame
   rates let the compositor grab frames before they are finished, which shows as black flicker
   (especially when opening shops or moving the ConsolePort cursor). Applied automatically on
