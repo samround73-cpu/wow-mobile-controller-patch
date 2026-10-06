@@ -245,6 +245,13 @@ public class GLRenderer implements GLSurfaceView.Renderer, WindowManager.OnWindo
 
             GLES20.glDrawArrays(GLES20.GL_TRIANGLE_STRIP, 0, quadVertices.count());
             GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, 0);
+
+            // A GPUImage is a hardware buffer the X server writes into directly from the CPU
+            // (e.g. every Present copies the game's new frame in). The GPU samples it
+            // asynchronously, so without waiting here the next frame can be written while the
+            // GPU is still reading this one, which shows up as random black/partial frames.
+            // Finish the GPU read while we still hold the drawable's render lock.
+            if (texture instanceof GPUImage) GLES20.glFinish();
         }
     }
 
